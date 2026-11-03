@@ -10,6 +10,7 @@ Distributed training on OpenShift AI requires specific components in the `DataSc
 | aipipelines | Managed | Removed | Managed |
 | kueue | Unmanaged | Unmanaged | Unmanaged |
 | ray | Managed | Managed | Managed |
+| trainer | Managed | Managed | Managed |
 | trainingoperator | Managed | Managed | Managed |
 | workbenches | Removed | Managed | Managed |
 

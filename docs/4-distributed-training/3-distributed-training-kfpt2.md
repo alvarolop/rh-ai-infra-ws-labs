@@ -10,7 +10,28 @@ You’ll run a tiny **DDP** training loop (Fashion-MNIST) across **2 nodes** wit
 - GPUs available in the cluster and a project namespace (for example `${USER_NAME}-training`)
 - Sufficient quota for at least two nodes with one GPU each (adjust `numNodes` and GPU counts for your environment)
 
-## ✅ Verify ClusterTrainingRuntimes
+## JobSetOperator
+
+The JobSet Operator is required in Red Hat OpenShift AI (RHOAI) because it serves as the underlying orchestration engine for Kubeflow Trainer v2 and Kueue, enabling multi-node distributed AI training jobs to execute with coordinated pod lifecycles, deterministic network discovery, and all-or-nothing failure recovery.
+
+Verify whether the OpenShift JobSet operator is deployed, and proceed with installation if it is not yet available:
+
+1. Deploy the JobSet Operator:
+
+```bash
+cat << 'EOF' | oc apply -f-
+apiVersion: operator.openshift.io/v1
+kind: JobSetOperator
+metadata:
+  name: cluster
+spec:
+  logLevel: Normal
+  managementState: Managed
+  operatorLogLevel: Normal
+EOF
+```
+
+### ✅ Verify ClusterTrainingRuntimes
 
 Kubeflow Trainer v2 ships pre-built `ClusterTrainingRuntime` resources. List them:
 
@@ -115,7 +136,6 @@ metadata:
 data:
   train.py: |
     import os
-
     import torch
     import torch.nn as nn
     import torch.distributed as dist
@@ -139,14 +159,20 @@ data:
 
         def forward(self, inputs):
             inputs = self.flatten(inputs)
-            logits = self.linear_relu_stack(inputs)
-            return logits
+            return self.linear_relu_stack(inputs)
 
     def get_dataset():
+        local_rank = int(os.environ.get("LOCAL_RANK", "0"))
+        if local_rank == 0:
+            datasets.FashionMNIST(root="/tmp/data", train=True, download=True)
+
+        if dist.is_initialized():
+            dist.barrier()
+
         return datasets.FashionMNIST(
             root="/tmp/data",
             train=True,
-            download=True,
+            download=False,
             transform=ToTensor(),
         )
 
@@ -154,19 +180,16 @@ data:
         num_epochs = 3
         batch_size = 64
 
-        # Kubeflow Trainer sets rendezvous env for torchrun; we still need to init the process group.
-        backend = "nccl" if torch.cuda.is_available() else "gloo"
-        dist.init_process_group(backend=backend)
-
-        dataset = get_dataset()
-
-        # Local rank maps to GPU index on the node.
         local_rank = int(os.environ.get("LOCAL_RANK", "0"))
         if torch.cuda.is_available():
             torch.cuda.set_device(local_rank)
             device = torch.device("cuda", local_rank)
+            dist.init_process_group(backend="nccl", device_id=torch.device(f"cuda:{local_rank}"))
         else:
             device = torch.device("cpu")
+            dist.init_process_group(backend="gloo")
+
+        dataset = get_dataset()
 
         sampler = DistributedSampler(
             dataset,
@@ -183,7 +206,6 @@ data:
         )
 
         model = NeuralNetwork().to(device)
-
         if torch.cuda.is_available():
             model = DDP(model, device_ids=[local_rank], output_device=local_rank)
         else:
@@ -204,7 +226,6 @@ data:
                 loss.backward()
                 optimizer.step()
 
-            # Avoid log spam: have rank 0 print a simple progress line.
             if dist.get_rank() == 0:
                 print(f"epoch: {epoch}, loss: {loss.item():.4f}", flush=True)
 
@@ -230,7 +251,7 @@ metadata:
     kueue.x-k8s.io/queue-name: kf-train-lq
 spec:
   runtimeRef:
-    name: torch-distributed
+    name: torch-distributed-cuda130-torch211-py312
     kind: ClusterTrainingRuntime
   trainer:
     command: ["torchrun", "/workspace/train.py"]
@@ -252,11 +273,17 @@ spec:
           - name: script-volume
             configMap:
               name: train-fashion-mnist
+          - name: dshm
+            emptyDir:
+              medium: Memory
+              sizeLimit: 16Gi
         containers:
           - name: node
             volumeMounts:
               - name: script-volume
                 mountPath: /workspace
+              - name: dshm
+                mountPath: /dev/shm
 EOF
 ```
 
