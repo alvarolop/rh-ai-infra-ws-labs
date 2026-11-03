@@ -106,3 +106,71 @@ oc get pods -n redhat-ods-applications -l app.kubernetes.io/name=training-operat
 NAME                                          READY   STATUS    RESTARTS   AGE
 kubeflow-training-operator-774b75cb67-s9qfw   1/1     Running   0          9m36s
 ```
+
+## JobSet Operator
+
+The **JobSet Operator** is an OpenShift and Kubernetes-native workload management solution designed to manage and orchestrate large-scale, coordinated batch computing workloads—specifically **distributed AI/ML model training** (such as PyTorch, JAX, or TensorFlow) and **High-Performance Computing (HPC)**.
+
+The JobSet Operator is required in Red Hat OpenShift AI (RHOAI) because it serves as the underlying orchestration engine for Kubeflow Trainer v2 and Kueue, enabling multi-node distributed AI training jobs to execute with coordinated pod lifecycles, deterministic network discovery, and all-or-nothing failure recovery.
+
+1. Create a namespace for the JobSet Operator:
+
+```bash
+cat << 'EOF' | oc apply -f-
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openshift-jobset-operator
+  labels:
+    name: openshift-jobset-operator
+    openshift.io/cluster-monitoring: "true"
+EOF
+```
+
+2. Install the JobSet OperatorGroup in the namespace you created in the previous step by creating the following objects:
+
+```bash
+cat << 'EOF' | oc apply -f-
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  generateName: openshift-jobset-operator-
+  name: openshift-jobset-operator
+  namespace: openshift-jobset-operator
+spec:
+  targetNamespaces:
+  - openshift-jobset-operator
+EOF
+```
+
+3. Create the following Subscription CR:
+
+```bash
+cat << 'EOF' | oc apply -f-
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: job-set
+  namespace: openshift-jobset-operator
+spec:
+  channel: "stable-v1.0"
+  installPlanApproval: Automatic
+  name: job-set
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+EOF
+```
+
+4. To verify that the Operator deployment is successful, run:
+
+```bash
+oc get pods -n openshift-jobset-operator
+```
+
+?> ✅ You should see pods in **Running** state.
+
+```text
+NAME                                      READY   STATUS    RESTARTS   AGE
+jobset-operator-854c7f58d8-hht5c   1/1     Running             0          3s
+```
+

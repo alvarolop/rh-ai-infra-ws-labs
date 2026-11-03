@@ -19,11 +19,10 @@ The lab exercises walk through enabling distributed training components in the `
 
 This module builds on a cluster with OpenShift AI and GPU accelerators already configured:
 
-* Red Hat OpenShift 4.21+
-* Red Hat OpenShift AI 3.3+
-* Accelerators configured (NVIDIA GPU Operator and cluster policy)
-* Node Feature Discovery Operator installed
-* JobSet Operator installed
+* Red Hat Openshift 4.22+
+* Red Hat Openshift AI 3.5+
+* Accelerators Configured (NVIDIA Operator + gpu-cluster-policy)
+* Node Feature Discovery Operator + nfd-instance
 
 > The required components are fully available within the "Red Hat OpenShift AI 3" catalog item on demo.redhat.com and it is possible to find the content slides in the following [link](https://docs.google.com/presentation/d/1huYUx2eKdKCgHiuiWHNJM_-3IHhdsR022Sm_Yug5Kf0/edit?usp=sharing) 
 
