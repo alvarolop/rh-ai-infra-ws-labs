@@ -15,6 +15,8 @@ Distributed training on OpenShift AI requires specific components in the `DataSc
 
 ?> It is important to avoid defining kueue as *Managed* because we will install Red Hat Build of Kueue (RHBoK) 
 
+?> Define `autoCreateQueues: true` in kueue configuration
+
 1. As `cluster-admin`, open the OpenShift console and navigate to **Ecosystem** → **Operators** → **Installed Operators** → **Red Hat OpenShift AI** → **Data Science Cluster** → your DSC instance (for example, `default-dsc`).
 
 2. Select the **YAML** tab and confirm the component states:

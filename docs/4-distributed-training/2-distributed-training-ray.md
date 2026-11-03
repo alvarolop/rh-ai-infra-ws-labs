@@ -140,8 +140,8 @@ You can reuse an existing workbench in a project that already runs a **Standard 
    | **Name** | `<USER_NAME>-ray-train-wb` |
    | **Notebook image** | Jupyter \| PyTorch \| CUDA \| Python 3.12 |
    | **Version** | 2025.2 |
-   | **Hardware profile** | `gpu-profile` |
-   | **GPU requests** | 2 *(expand Customize resource requests and limits)* |
+   | **Hardware profile** | `user1-ray-train-profile` |
+   | **GPU requests** | 2 |
    | **GPU limits** | 4 |
 
 4. ▶️ When the workbench status shows **Running**, click its name to open the JupyterLab environment.
