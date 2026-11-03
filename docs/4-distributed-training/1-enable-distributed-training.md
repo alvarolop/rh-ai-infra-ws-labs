@@ -46,22 +46,67 @@ spec:
 
 After changing DataScienceCluster and installing the `Red Hat build of Kueue` operator, the platform is ready to support any 
 
-### Verify Kueue
+### Kueue Operator
 
-Kueue queues and admits distributed workloads according to cluster quotas. Confirm the OpenShift Kueue operator and controller are running:
+Kueue queues and admits distributed workloads according to cluster quotas. Verify whether the OpenShift Kueue operator is deployed, and proceed with installation if it is not yet available:
+
+1. Create a namespace for the Kueue Operator:
+
+```bash
+cat << 'EOF' | oc apply -f-
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openshift-kueue-operator
+  labels:
+    openshift.io/cluster-monitoring: "true"
+EOF
+```
+
+2. Install the Kueue OperatorGroup in the namespace you created in the previous step by creating the following objects:
+
+```bash
+cat << 'EOF' | oc apply -f-
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  generateName: openshift-kueue-operator-
+  name: openshift-kueue-operator
+  namespace: openshift-kueue-operator
+spec: {}
+EOF
+```
+
+3. Create the following Subscription CR:
+
+```bash
+cat << 'EOF' | oc apply -f-
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: kueue-operator
+  namespace: openshift-kueue-operator
+spec:
+  channel: "stable-v1.5"
+  installPlanApproval: Automatic
+  name: kueue-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+EOF
+```
+
+4. To verify that the Operator deployment is successful, run:
 
 ```bash
 oc get pods -n openshift-kueue-operator
 ```
 
-* **Sample output** for the Kueue controller in `openshift-kueue-operator`:
+?> ✅ You should see pods in **Running** state.
 
 ```text
-NAME                                        READY   STATUS    RESTARTS   AGE
-kueue-controller-manager-79bc65cbf5-298d5   1/1     Running   0          3m57s
-kueue-controller-manager-79bc65cbf5-qc68q   1/1     Running   0          3m57s
-openshift-kueue-operator-774fd4fc95-n9s5n   1/1     Running   0          4m37s
-openshift-kueue-operator-774fd4fc95-qs58t   1/1     Running   0          4m37s
+NAME                                      READY   STATUS    RESTARTS   AGE
+openshift-kueue-operator-76bb977d5d-bl8t4   1/1     Running   0          28s
+openshift-kueue-operator-76bb977d5d-sxw8s   1/1     Running   0          28s
 ```
 
 Additionally, confirm that a Kueue instance has been created:
@@ -112,6 +157,8 @@ kubeflow-training-operator-774b75cb67-s9qfw   1/1     Running   0          9m36s
 The **JobSet Operator** is an OpenShift and Kubernetes-native workload management solution designed to manage and orchestrate large-scale, coordinated batch computing workloads—specifically **distributed AI/ML model training** (such as PyTorch, JAX, or TensorFlow) and **High-Performance Computing (HPC)**.
 
 The JobSet Operator is required in Red Hat OpenShift AI (RHOAI) because it serves as the underlying orchestration engine for Kubeflow Trainer v2 and Kueue, enabling multi-node distributed AI training jobs to execute with coordinated pod lifecycles, deterministic network discovery, and all-or-nothing failure recovery.
+
+Verify whether the OpenShift JobSet operator is deployed, and proceed with installation if it is not yet available:
 
 1. Create a namespace for the JobSet Operator:
 
