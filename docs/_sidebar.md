@@ -9,7 +9,12 @@
     * [1.2.2 Activating the Model Registry](1-ocp-ai-operator-components/2-component-configuration.md#activating-the-model-registry)
     * [1.2.3 Lifecycle Management (Resource Removal)](1-ocp-ai-operator-components/2-component-configuration.md#lifecycle-management-resource-removal)
     * [1.2.4 Troubleshooting Logic](1-ocp-ai-operator-components/2-component-configuration.md#troubleshooting-logic)
-    
+  * [1.3. Workshop Workbench Setup](1-ocp-ai-operator-components/3-workbench-setup.md)
+    * [1.3.1 Create a Data Science Project](1-ocp-ai-operator-components/3-workbench-setup.md#create-a-data-science-project)
+    * [1.3.2 Create a Code Server Workbench](1-ocp-ai-operator-components/3-workbench-setup.md#create-a-code-server-workbench)
+    * [1.3.3 Access the Workbench](1-ocp-ai-operator-components/3-workbench-setup.md#access-the-workbench)
+    * [1.3.4 Verify the CLI Tools and Log In](1-ocp-ai-operator-components/3-workbench-setup.md#verify-the-cli-tools-and-log-in)
+
 * 🏎️ Module 2 [Accelerators Integration](2-accelerators-integration/README.md) 
   * [2.1. Enabling Accelerators](2-accelerators-integration/1-enabling-accelerators.md)
     * [2.1.1 Node Feature Discovery](2-accelerators-integration/1-enabling-accelerators.md#node-feature-discovery)
