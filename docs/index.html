@@ -250,7 +250,49 @@
         crossChapter: true
     },
       plugins: [
-        function(hook) {
+        function(hook, vm) {
+          // docsify-pagination counts sidebar anchor entries (page.md#section) as separate pages,
+          // so NEXT/PREVIOUS point to the same page. Rebuild them using one link per page.
+          hook.doneEach(function() {
+            var container = document.querySelector('.docsify-pagination-container');
+            if (!container) return;
+
+            function pathOf(a) {
+              var p = decodeURIComponent(a.getAttribute('href').split('?')[0]);
+              return p.toUpperCase() === '#/README' ? '#/' : p;
+            }
+
+            var seen = {};
+            var pages = Array.prototype.slice.call(document.querySelectorAll('.sidebar-nav li a'))
+              .filter(function(a) { return !a.classList.contains('section-link'); })
+              .filter(function(a) {
+                var p = pathOf(a);
+                if (seen[p]) return false;
+                seen[p] = true;
+                return true;
+              });
+
+            var current = decodeURIComponent(vm.router.toURL(vm.route.path));
+            if (current.toUpperCase() === '#/README') current = '#/';
+            var idx = pages.findIndex(function(a) { return pathOf(a) === current; });
+            if (idx === -1) return;
+
+            function item(a, kind, label) {
+              var arrow = kind === 'next'
+                ? '<svg width="10" height="16" viewBox="0 0 10 16" xmlns="http://www.w3.org/2000/svg"><polyline fill="none" vector-effect="non-scaling-stroke" points="2,2 8,8 2,14"/></svg>'
+                : '<svg width="10" height="16" viewBox="0 0 10 16" xmlns="http://www.w3.org/2000/svg"><polyline fill="none" vector-effect="non-scaling-stroke" points="8,2 2,8 8,14"/></svg>';
+              var inner = kind === 'next' ? '<span>' + label + '</span>' + arrow : arrow + '<span>' + label + '</span>';
+              return '<div class="pagination-item pagination-item--' + (kind === 'next' ? 'next' : 'previous') + '">' +
+                '<a href="' + a.getAttribute('href') + '"' + (a.getAttribute('target') === '_blank' ? ' target="_blank"' : '') + '>' +
+                '<div class="pagination-item-label">' + inner + '</div>' +
+                '<div class="pagination-item-title">' + a.innerText + '</div></a></div>';
+            }
+
+            container.innerHTML =
+              (pages[idx - 1] ? item(pages[idx - 1], 'previous', 'PREVIOUS') : '') +
+              (pages[idx + 1] ? item(pages[idx + 1], 'next', 'NEXT') : '');
+          });
+
           hook.beforeEach(function(content) {
 
             fetch('config/all.json')
