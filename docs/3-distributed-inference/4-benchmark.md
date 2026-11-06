@@ -353,7 +353,6 @@ spec:
           image: ghcr.io/vllm-project/guidellm:latest
           env:
             - name: GUIDELLM__SPEC__BACKEND
-              value: '{"kind": "openai_http", "target": "http://ad73cfa8ab65b4aa2bed08540314ff8e-1408741115.us-east-2.elb.amazonaws.com/user1/llama-llm-d", "model": "llama-3-1-8b-instruct-fp8"}'  # <-------------------------------- Replace HERE !!!${LLMD_URL}
               value: '{"kind": "openai_http", "target": "${LLMD_URL}", "model": "llama-3-1-8b-instruct-fp8"}'  # <-------------------------------- Replace HERE !!!
             - name: GUIDELLM__SPEC__PROFILE
               value: '{"kind": "concurrent", "streams": [1, 2, 4, 8]}'
