@@ -80,7 +80,7 @@ From the terminal inside VS Code, verify that the required CLI tools are availab
 3. At this point, the terminal is running as the workbench service account. To interact with the cluster as a user, log in with your credentials:
 
    ```bash
-   oc login -u admin --server=https://api.<CLUSTER_DOMAIN>:6443
+   oc login -u admin --server=<API_URL>
    ```
 
 4. Verify the connection:

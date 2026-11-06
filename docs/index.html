@@ -35,8 +35,8 @@
         <input type="text" id="pass" name="password" placeholder="Your password">
       </div>
 
-      <div class="user-inputs" style="display: none;">
-        <label for="cdomain">Cluster Domain</label><br/>
+      <div class="user-inputs">
+        <label for="cdomain">Cluster Domain (optional)</label><br/>
         <input type="text" id="cdomain" name="clusterdomain" placeholder="Your cluster domain..">
       </div>
 
@@ -208,6 +208,12 @@
         var reEsc = new RegExp('&lt;' + t + '&gt;', 'g');
         out = out.replace(reEsc, sub);
         out = out.split('<' + t + '>').join(sub);
+      }
+      // <API_URL> is derived from the cluster domain: apps.ocp.example.com -> https://api.ocp.example.com:6443
+      var domain = localStorage.getItem('CLUSTER_DOMAIN');
+      if (domain) {
+        var apiUrl = escapeForHtmlText('https://api.' + domain.replace(/^apps\./, '') + ':6443');
+        out = out.replace(/&lt;API_URL&gt;/g, apiUrl).split('<API_URL>').join(apiUrl);
       }
       return out;
     }
