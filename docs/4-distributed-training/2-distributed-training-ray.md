@@ -92,11 +92,11 @@ spec:
       maxCount: 8Gi
       minCount: 2Gi
       resourceType: Memory
-    - defaultCount: 2
+    - defaultCount: 4
       displayName: GPU
       identifier: nvidia.com/gpu
       maxCount: 4
-      minCount: 2
+      minCount: 4
       resourceType: Accelerator
   scheduling:
     kueue:
@@ -141,12 +141,12 @@ You can reuse an existing workbench in a project that already runs a **Standard 
    | **Notebook image** | Jupyter \| PyTorch \| CUDA \| Python 3.12 |
    | **Version** | 2025.2 |
    | **Hardware profile** | `user1-ray-train-profile` |
-   | **GPU requests** | 2 |
+   | **GPU requests** | 4 |
    | **GPU limits** | 4 |
 
 4. ▶️ When the workbench status shows **Running**, click its name to open the JupyterLab environment.
 
-?> 🎯 **Why 2–4 GPUs on the workbench?** The notebook needs enough local GPU headroom to orchestrate Ray while workers run on the cluster. Your instructor may suggest different values for your environment.
+?> 🎯 **Why 4 GPUs on the workbench?** The notebook needs enough local GPU headroom to orchestrate Ray while workers run on the cluster. GPU requests and limits **must be equal** (Kubernetes rejects extended resources like `nvidia.com/gpu` when they differ, and the workbench would never start). Your instructor may suggest different values for your environment.
 
 ---
 
